@@ -29,7 +29,8 @@ def cleandir(relative_path):
 
 
 def download(url, relative_path):
-    if not re.search("http:,https:", url, flags=re.I):
+    print(re.match("http: | https:", url, re.M | re.I))
+    if not re.match("http:|https:", url, re.M | re.I):
         url = f"https:{url}"
     name = re.findall(r'[^\\/:*?"<>|\r\n]+$', url)[0]
     path = os.path.join(root_path, "downloads", relative_path, name)

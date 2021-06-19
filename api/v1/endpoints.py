@@ -66,7 +66,7 @@ class Preloading(Resource):
 
         return Response.success({
             "page_id": page_id,
-            "images": images,
+            "images": image_list,
         })
 
 
