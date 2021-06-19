@@ -26,9 +26,9 @@ area = api.model("Area", {
 })
 # 识别
 detector = api.model("Detector", {
-    "detector_img": fields.String(required=True, description="please add detectorImg."),
-    "page_id": fields.String(required=True, description="please add pageId."),
-    "target_image": fields.String(required=True, description="please add pageId."),
+    "detector_image_url": fields.String(required=True, description="指定需要匹配的设计稿图片."),
+    "page_id": fields.String(required=True, description="当前页面id."),
+    "target_image": fields.String(required=True, description="目标元素的base64编码图."),
 })
 
 # 识别响应

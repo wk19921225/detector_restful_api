@@ -1,8 +1,8 @@
 import os
-import sys
-import shutil
-import requests
 import re
+import requests
+import shutil
+import sys
 
 root_path = sys.path[0]
 

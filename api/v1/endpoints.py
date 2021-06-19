@@ -6,7 +6,7 @@ from api.restplus import api
 from api.v1 import serializers
 from system import variables
 from system.files_operation import mkdir, cleandir, download
-import requests
+from system.image_detector import object_detect
 
 ns = api.namespace(variables.V1_NAMESPACE,
                    description=f"API Version {variables.V1_VERSION}")
@@ -49,9 +49,9 @@ def request_parse(req_data):
 class Preloading(Resource):
     @api.expect(serializers.preloading)
     @api.response(code=200, model=serializers.preloading_res, description="预下载识别图片")
-    def get(self):
+    def post(self):
         data = request_parse(request)
-        page_id = data["page_id"]
+        page_id = str(data["page_id"])
         images = data["images"]
         # 创建文件夹状态 boolean
         ds = mkdir(page_id)
@@ -76,9 +76,10 @@ class Detector(Resource):
     @api.response(code=200, model=serializers.detector_res, description="特征识别")
     def post(self):
         data = request_parse(request)
-        detector_img = data["detector_img"]
-        page_id = data["detector_img"]
-        target_image = data["detector_img"]
+        detector_image_url = data["detector_image_url"]
+        page_id = str(data["page_id"])
+        target_image = data["target_image"]
+        object_detect(target_image, page_id, detector_image_url)
         return Response.success({
             "area": [
                 {
