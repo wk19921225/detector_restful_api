@@ -1,0 +1,15 @@
+FROM python:3.8-buster
+
+MAINTAINER Alexandre Carvalho <alexandrejacarvalho@protonmail.com>
+
+# Environment Variables
+ENV PYTHONUNBUFFERED 1
+
+# Create Directories
+RUN mkdir /root/app
+WORKDIR /root/app
+
+# Install Python Packages
+COPY ./requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+RUN pip install gunicorn

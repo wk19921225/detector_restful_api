@@ -1,0 +1,15 @@
+version: "3"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile-api
+    volumes:
+      - .:/root/app
+    depends_on:
+      - worker
+      - redis
+    environment:
+      PROJECT_ENV: production
+    command:
+      sh -c "gunicorn --bind 0.0.0.0:8080 app:app"
