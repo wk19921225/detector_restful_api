@@ -1,13 +1,12 @@
-from system.logger import Logger
-from system import variables
-
 from flask import request
 from flask_restplus import Resource
 
-from api.restplus import api
 from api.response import Response
-
+from api.restplus import api
 from api.v1 import serializers
+from system import variables
+from system.files_operation import mkdir, cleandir, download
+import requests
 
 ns = api.namespace(variables.V1_NAMESPACE,
                    description=f"API Version {variables.V1_VERSION}")
@@ -54,6 +53,16 @@ class Preloading(Resource):
         data = request_parse(request)
         page_id = data["page_id"]
         images = data["images"]
+        # 创建文件夹状态 boolean
+        ds = mkdir(page_id)
+        image_list = images.split(',')
+
+        if not ds:
+            # 创建失败 已存在 清空文件夹重新下载
+            cleandir(page_id)
+        image_len = len(image_list)
+        for i in range(0, image_len):
+            download(image_list[i], page_id)
 
         return Response.success({
             "page_id": page_id,
