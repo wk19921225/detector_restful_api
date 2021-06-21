@@ -13,16 +13,16 @@ preloading_res = api.model("Preloading_res", {
 })
 
 point = api.model("Point", {
-    "x": fields.Integer(required=True, description="横坐标"),
-    "y": fields.Integer(required=True, description="纵坐标"),
+    "x": fields.Float(required=True, description="横坐标"),
+    "y": fields.Float(required=True, description="纵坐标"),
 })
 
 area = api.model("Area", {
-    "x": fields.Integer(required=True, description="横坐标"),
-    "y": fields.Integer(required=True, description="纵坐标"),
-    "width": fields.Integer(required=True, description="宽"),
-    "height": fields.Integer(required=True, description="高"),
-    "center": fields.Nested(required=False, model=point, description="重心"),
+    "left_top": fields.Nested(point, description="左上位置坐标"),
+    "left_bottom": fields.Nested(point, description="左下位置坐标"),
+    "right_top": fields.Nested(point, description="右上位置坐标"),
+    "right_bottom": fields.Nested(point, description="右下位置坐标"),
+    "center": fields.Nested(point, description="重心"),
 })
 # 识别
 detector = api.model("Detector", {

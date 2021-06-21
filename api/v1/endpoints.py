@@ -7,6 +7,7 @@ from api.v1 import serializers
 from system import variables
 from system.files_operation import mkdir, cleandir, download
 from system.image_detector import object_detect
+import json
 
 ns = api.namespace(variables.V1_NAMESPACE,
                    description=f"API Version {variables.V1_VERSION}")
@@ -31,19 +32,6 @@ def request_parse(req_data):
 #             "status": "online",
 #             "version": variables.V1_VERSION
 #         })
-
-
-# @ns.route("/auth/register/")
-# class Index(Resource):
-#     @api.expect(serializers.register, validate=True)
-#     def post(self):
-#         body = request.json
-#
-#         Logger.info("A user as been registered (%s, %s).",
-#                     body["username"], body["email"])
-#
-#         return Response.success(body, status=201)
-
 
 @ns.route("/preloading")
 class Preloading(Resource):
@@ -79,18 +67,6 @@ class Detector(Resource):
         detector_image_url = data["detector_image_url"]
         page_id = str(data["page_id"])
         target_image = data["target_image"]
-        object_detect(target_image, page_id, detector_image_url)
-        return Response.success({
-            "area": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 0,
-                    "height": 0,
-                    "center": {
-                        "x": 0,
-                        "y": 0
-                    }
-                }
-            ]
-        })
+        area = object_detect(target_image, page_id, detector_image_url)
+        print(area)
+        return Response.success([area])

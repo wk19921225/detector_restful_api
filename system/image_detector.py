@@ -73,21 +73,34 @@ def object_detect(target_base64, page_id, url):
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
         # 计算变换矩阵和MASK
         M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-        matches_mask = mask.ravel().tolist()
-        c, h, w = template.shape
+        # matches_mask = mask.ravel().tolist()
+        h, w, c = template.shape
         # 使用得到的变换矩阵对原图像的四个角进行变换，获得在目标图像上对应的坐标
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-        dst = cv2.perspectiveTransform(pts, M)
-        cv2.polylines(img_relay, [np.int32(dst)], True, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.imwrite(get_save_image_path("img_relay.png"), img_relay)
+        areas = cv2.perspectiveTransform(pts, M)
+        cv2.polylines(img_relay, [np.int32(areas)], True, (0, 255, 0), 2, cv2.LINE_AA)
+        [[ltx, lty], [lbx, lby], [rtx, rty], [rbx, rby]] = np.squeeze(areas).tolist()
+        return {
+            "left_top": {"x": ltx, "y": lty},
+            "left_bottom": {"x": lbx, "y": lby},
+            "right_top": {"x": rtx, "y": rty},
+            "right_bottom": {"x": rbx, "y": rby},
+            "center": {"x": (ltx + rtx + lbx + rbx) / 4, "y": (lty + rty + lby + rby) / 4},
+        }
+        # for i in areas.length:
+        #     # print(area.flatten())
+        #     w, h = areas[i].shape
+        #     print(w, h)
+        #     print(type(areas))
+        # cv2.imwrite(get_save_image_path("img_relay.png"), img_relay)
     else:
         print("Not enough matches are found - %d/%d" % (len(good), MIN_MATCH_COUNT))
         matches_mask = None
-    draw_params = dict(matchColor=(0, 255, 0),
-                       singlePointColor=None,
-                       matchesMask=matches_mask,
-                       flags=2)
-    result = cv2.drawMatches(template, kp1, img_relay, kp2, good, None, **draw_params)
-    cv2.imwrite(get_save_image_path("result.png"), result)
-    plt.imshow(result, 'gray')
-    plt.show()
+    # draw_params = dict(matchColor=(0, 255, 0),
+    #                    singlePointColor=None,
+    #                    matchesMask=matches_mask,
+    #                    flags=2)
+    # result = cv2.drawMatches(template, kp1, img_relay, kp2, good, None, **draw_params)
+    # cv2.imwrite(get_save_image_path("result.png"), result)
+    # plt.imshow(result, 'gray')
+    # plt.show()
