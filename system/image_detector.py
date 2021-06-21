@@ -26,10 +26,11 @@ MIN_MATCH_COUNT = 20  # 设置最低特征点匹配数量为10
 
 
 def object_detect(target_base64, page_id, url):
+    ltx, lty, lbx, lby, rtx, rty, rbx, rby = 0, 0, 0, 0, 0, 0, 0, 0
     target_image = decode_base64_str(target_base64)
     # 用来匹配的模板图片
     template = cv2.imdecode(target_image, cv2.COLOR_BGR2GRAY)
-    cv2.imwrite(get_save_image_path("template.png"), template)
+    # cv2.imwrite(get_save_image_path("template.png"), template)
     file_path = get_image_path(page_id, url)
     # 视觉稿
     img_relay = cv2.imread(file_path, cv2.COLOR_BGR2GRAY)
@@ -63,7 +64,7 @@ def object_detect(target_base64, page_id, url):
     matches = flann.knnMatch(des1, des2, k=2)
     # 存储匹配值
     good = []
-    # 舍弃大于0.7的匹配
+    # 舍弃大于0.9的匹配
     for m, n in matches:
         if m.distance < 0.9 * n.distance:
             good.append(m)
@@ -73,26 +74,14 @@ def object_detect(target_base64, page_id, url):
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
         # 计算变换矩阵和MASK
         M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-        # matches_mask = mask.ravel().tolist()
+        matches_mask = mask.ravel().tolist()
         h, w, c = template.shape
         # 使用得到的变换矩阵对原图像的四个角进行变换，获得在目标图像上对应的坐标
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-        areas = cv2.perspectiveTransform(pts, M)
-        cv2.polylines(img_relay, [np.int32(areas)], True, (0, 255, 0), 2, cv2.LINE_AA)
-        [[ltx, lty], [lbx, lby], [rtx, rty], [rbx, rby]] = np.squeeze(areas).tolist()
-        return {
-            "left_top": {"x": ltx, "y": lty},
-            "left_bottom": {"x": lbx, "y": lby},
-            "right_top": {"x": rtx, "y": rty},
-            "right_bottom": {"x": rbx, "y": rby},
-            "center": {"x": (ltx + rtx + lbx + rbx) / 4, "y": (lty + rty + lby + rby) / 4},
-        }
-        # for i in areas.length:
-        #     # print(area.flatten())
-        #     w, h = areas[i].shape
-        #     print(w, h)
-        #     print(type(areas))
-        # cv2.imwrite(get_save_image_path("img_relay.png"), img_relay)
+        dst = cv2.perspectiveTransform(pts, M)
+        cv2.polylines(img_relay, [np.int32(dst)], True, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.imwrite(get_save_image_path("img_relay.png"), img_relay)
+        [ltx, lty, lbx, lby, rtx, rty, rbx, rby] = np.ravel(dst).tolist()
     else:
         print("Not enough matches are found - %d/%d" % (len(good), MIN_MATCH_COUNT))
         matches_mask = None
@@ -104,3 +93,10 @@ def object_detect(target_base64, page_id, url):
     # cv2.imwrite(get_save_image_path("result.png"), result)
     # plt.imshow(result, 'gray')
     # plt.show()
+    return {
+        "left_top": {"x": ltx, "y": lty},
+        "left_bottom": {"x": lbx, "y": lby},
+        "right_top": {"x": rtx, "y": rty},
+        "right_bottom": {"x": rbx, "y": rby},
+        "center": {"x": (ltx + rtx + lbx + rbx) / 4, "y": (lty + rty + lby + rby) / 4},
+    }
