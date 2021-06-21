@@ -5,7 +5,6 @@ from api.restplus import api
 
 from system import config
 
-
 app = Flask(__name__)
 
 # Middleware
@@ -22,4 +21,6 @@ api.add_namespace(v1)
 app.register_blueprint(blueprint)
 
 if __name__ == "__main__":
-    app.run(debug=config.FLASK_DEBUG, port=32123)
+    app.run(debug=config.FLASK_DEBUG,
+            host='0.0.0.0',
+            port=32123)

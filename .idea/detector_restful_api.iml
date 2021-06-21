@@ -13,6 +13,9 @@
   <component name="PackageRequirementsSettings">
     <option name="modifyBaseFiles" value="true" />
   </component>
+  <component name="PyDocumentationSettings">
+    <option name="renderExternalDocumentation" value="true" />
+  </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
   </component>
