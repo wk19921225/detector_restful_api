@@ -23,7 +23,8 @@ def decode_base64_str(img_base64_str):
 
 
 MIN_MATCH_COUNT = 20  # 设置最低特征点匹配数量为10
-
+# 图片缩放倍数
+IMAGE_RESIZE = 2
 
 def object_detect(target_base64, page_id, url):
     ltx, lty, lbx, lby, rtx, rty, rbx, rby = 0, 0, 0, 0, 0, 0, 0, 0
@@ -34,6 +35,10 @@ def object_detect(target_base64, page_id, url):
     file_path = get_image_path(page_id, url)
     # 视觉稿
     img_relay = cv2.imread(file_path, cv2.COLOR_BGR2GRAY)
+    # 将图片高和宽分别赋值给x，y
+    x, y = img_relay.shape[0:2]
+    # 缩放到原来的二分之一，输出尺寸格式为（宽，高）
+    img_relay_resize = cv2.resize(img_relay, (int(y / IMAGE_RESIZE), int(x / IMAGE_RESIZE)))
 
     #  计算特征点提取&生成描述时间
     # start = time.time()
@@ -41,7 +46,7 @@ def object_detect(target_base64, page_id, url):
     sift = cv2.xfeatures2d.SIFT_create()
     # 使用SIFT查找关键点key points和描述符descriptors
     kp1, des1 = sift.detectAndCompute(template, None)
-    kp2, des2 = sift.detectAndCompute(img_relay, None)
+    kp2, des2 = sift.detectAndCompute(img_relay_resize, None)
     # end = time.time()
     # print("特征点提取&生成描述运行时间:%.2f秒" % (end - start))
     #
@@ -59,7 +64,7 @@ def object_detect(target_base64, page_id, url):
     # 创建设置FLANN匹配
     FLANN_INDEX_KDTREE = 0
     index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
-    search_params = dict(checks=100)
+    search_params = dict(checks=50)
     flann = cv2.FlannBasedMatcher(index_params, search_params)
     matches = flann.knnMatch(des1, des2, k=2)
     # 存储匹配值
@@ -79,9 +84,10 @@ def object_detect(target_base64, page_id, url):
         # 使用得到的变换矩阵对原图像的四个角进行变换，获得在目标图像上对应的坐标
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         dst = cv2.perspectiveTransform(pts, M)
-        cv2.polylines(img_relay, [np.int32(dst)], True, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.imwrite(get_save_image_path("img_relay.png"), img_relay)
-        [ltx, lty, lbx, lby, rtx, rty, rbx, rby] = np.ravel(dst).tolist()
+        cv2.polylines(img_relay_resize, [np.int32(dst)], True, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.imwrite(get_save_image_path("img_relay.png"), img_relay_resize)
+        origin_list = np.ravel(dst).tolist()
+        [ltx, lty, lbx, lby, rtx, rty, rbx, rby] = map(lambda x: x * IMAGE_RESIZE, origin_list)
     else:
         print("Not enough matches are found - %d/%d" % (len(good), MIN_MATCH_COUNT))
         matches_mask = None
