@@ -24,7 +24,7 @@ def decode_base64_str(img_base64_str):
 
 MIN_MATCH_COUNT = 20  # 设置最低特征点匹配数量为10
 # 图片缩放倍数
-IMAGE_RESIZE = 2
+IMAGE_RESIZE = 2.8
 
 def object_detect(target_base64, page_id, url):
     ltx, lty, lbx, lby, rtx, rty, rbx, rby = 0, 0, 0, 0, 0, 0, 0, 0
