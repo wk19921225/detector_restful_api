@@ -1,4 +1,5 @@
 from flask import Flask, Blueprint
+from flask_cors import *
 from werkzeug.middleware.proxy_fix import ProxyFix
 from api.v1.endpoints import ns as v1
 from api.restplus import api
@@ -6,6 +7,9 @@ from api.restplus import api
 from system import config
 
 app = Flask(__name__)
+
+# CORS
+CORS(app, supports_credentials=True)
 
 # Middleware
 app.wsgi_app = ProxyFix(app.wsgi_app)

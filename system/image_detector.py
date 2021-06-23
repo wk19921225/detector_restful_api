@@ -22,9 +22,9 @@ def decode_base64_str(img_base64_str):
         raise Exception("Do not parse!")
 
 
-MIN_MATCH_COUNT = 20  # 设置最低特征点匹配数量为10
+MIN_MATCH_COUNT = 15  # 设置最低特征点匹配数量为10
 # 图片缩放倍数
-IMAGE_RESIZE = 2.8
+IMAGE_RESIZE = 2
 
 def object_detect(target_base64, page_id, url):
     ltx, lty, lbx, lby, rtx, rty, rbx, rby = 0, 0, 0, 0, 0, 0, 0, 0
@@ -62,9 +62,9 @@ def object_detect(target_base64, page_id, url):
     # plt.savefig(get_save_image_path('kp_image2.png'), dpi=300)
 
     # 创建设置FLANN匹配
-    FLANN_INDEX_KDTREE = 0
+    FLANN_INDEX_KDTREE = 2
     index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
-    search_params = dict(checks=50)
+    search_params = dict(checks=100)
     flann = cv2.FlannBasedMatcher(index_params, search_params)
     matches = flann.knnMatch(des1, des2, k=2)
     # 存储匹配值
@@ -84,19 +84,19 @@ def object_detect(target_base64, page_id, url):
         # 使用得到的变换矩阵对原图像的四个角进行变换，获得在目标图像上对应的坐标
         pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
         dst = cv2.perspectiveTransform(pts, M)
-        cv2.polylines(img_relay_resize, [np.int32(dst)], True, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.imwrite(get_save_image_path("img_relay.png"), img_relay_resize)
+        # cv2.polylines(img_relay_resize, [np.int32(dst)], True, (0, 255, 0), 2, cv2.LINE_AA)
+        # cv2.imwrite(get_save_image_path("img_relay.png"), img_relay_resize)
         origin_list = np.ravel(dst).tolist()
         [ltx, lty, lbx, lby, rtx, rty, rbx, rby] = map(lambda x: x * IMAGE_RESIZE, origin_list)
     else:
         print("Not enough matches are found - %d/%d" % (len(good), MIN_MATCH_COUNT))
         matches_mask = None
-    # draw_params = dict(matchColor=(0, 255, 0),
-    #                    singlePointColor=None,
-    #                    matchesMask=matches_mask,
-    #                    flags=2)
-    # result = cv2.drawMatches(template, kp1, img_relay, kp2, good, None, **draw_params)
-    # cv2.imwrite(get_save_image_path("result.png"), result)
+    draw_params = dict(matchColor=(0, 255, 0),
+                       singlePointColor=None,
+                       matchesMask=matches_mask,
+                       flags=2)
+    result = cv2.drawMatches(template, kp1, img_relay, kp2, good, None, **draw_params)
+    cv2.imwrite(get_save_image_path("result.png"), result)
     # plt.imshow(result, 'gray')
     # plt.show()
     return {

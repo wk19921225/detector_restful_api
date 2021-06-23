@@ -68,5 +68,5 @@ class Detector(Resource):
         page_id = str(data["page_id"])
         target_image = data["target_image"]
         area = object_detect(target_image, page_id, detector_image_url)
-        print(area)
+        # print(area)
         return Response.success([area])

@@ -2,6 +2,7 @@ class Response:
     @staticmethod
     def success(data=None, message=None, status=200):
         response = {
+            "code": 0,
             "result": True,
             "status": "success",
         }
@@ -16,6 +17,7 @@ class Response:
     @staticmethod
     def fail(data=None, message=None, status=400):
         response = {
+            "code": 1,
             "result": False,
             "status": "fail",
         }
@@ -30,6 +32,7 @@ class Response:
     @staticmethod
     def error(data=None, message=None, status=500):
         response = {
+            "code": 2,
             "result": False,
             "status": "error",
         }
